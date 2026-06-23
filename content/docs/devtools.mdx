@@ -1,0 +1,47 @@
+---
+title: Fusion Devtools
+description: Monitor your queries, mutations, and cache in real-time.
+---
+
+# Fusion Devtools
+
+React Fusion Devtools provides a floating, React Query-style Devtools panel for inspecting your internal application state. Because React Fusion executes almost all logic on the server, the Devtools panel needs a mechanism to inspect server-side state from the client browser.
+
+## Architecture
+
+1. **Telemetry Engine:** A lightweight, memory-capped tracking engine intercepts `executeRoute` and `eventBus.emit` to record performance and events.
+2. **Vite Plugin Proxy:** The plugin intercepts HTTP requests to `/__fusion_devtools` and returns a JSON snapshot of the server state.
+3. **Devtools Component:** A React component polls the proxy endpoint and renders a beautiful UI.
+
+## Installation
+
+The devtools are provided as a separate package:
+
+```bash
+npm install @suamnkayal/react-fusion-devtools
+```
+
+## Setup
+
+Inject the `<FusionDevtools />` component at the root of your React application.
+
+```tsx
+import { FusionDevtools } from "@suamnkayal/react-fusion-devtools";
+
+function App() {
+  return (
+    <Provider>
+      <MainContent />
+      <FusionDevtools />
+    </Provider>
+  );
+}
+```
+
+*Note: The devtools will automatically return `null` and do nothing when `process.env.NODE_ENV === "production"`.*
+
+## Features
+
+- **Query Inspector:** View all active queries, their inputs, outputs, and execution times.
+- **Cache Manager:** Manually inspect the in-memory cache and forcefully flush individual keys.
+- **Middleware Logs:** View the lifecycle of middlewares intercepting specific route executions.

@@ -1,0 +1,76 @@
+---
+title: Getting Started
+description: How to install and set up React Fusion in your Next.js or Vite project.
+---
+
+# Getting Started
+
+React Fusion is a lightweight React library and Vite plugin that brings backend execution seamlessly into your frontend components. It enables server‑side route registration and client‑side data fetching via `useServer` and `useMutation` hooks without AST parsing or code generation steps.
+
+## Installation
+
+Install React Fusion via your preferred package manager:
+
+```bash
+npm install @suamnkayal/react-fusion
+```
+
+## Vite Setup
+
+Add the Vite plugin to your `vite.config.ts` to enable automatic client generation and runtime proxying.
+
+```ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import fusion from "@suamnkayal/react-fusion/vite-plugin";
+
+export default defineConfig({
+  plugins: [react(), fusion()],
+});
+```
+
+## Project Structure
+
+A typical React Fusion project separates the backend definitions (`server/`) from the frontend UI (`src/`).
+
+```text
+my-app/
+├── server/
+│   ├── routes.ts      # Server function definitions
+│   └── index.ts       # Runtime initialization
+├── src/
+│   ├── App.tsx        # Frontend React components
+│   └── main.tsx
+└── vite.config.ts
+```
+
+## First Server Function
+
+Define a server function in your backend using the `server()` wrapper.
+
+```ts
+// server/routes.ts
+import { server } from "@suamnkayal/react-fusion/runtime";
+
+export const getGreeting = server("getGreeting", async (name: string) => {
+  return `Hello, ${name}! Welcome to React Fusion.`;
+});
+```
+
+## First Client Call
+
+In your React component, you can fetch data using `useServer()`. The type signatures are automatically inferred.
+
+```tsx
+// src/App.tsx
+import { useServer } from "@suamnkayal/react-fusion/react";
+import { getGreeting } from "../server/routes";
+
+export default function App() {
+  const { data, isLoading } = useServer(getGreeting, "Alice");
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return <div>{data}</div>;
+}
+```

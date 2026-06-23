@@ -1,0 +1,63 @@
+---
+title: API Reference
+description: Complete API reference for React Fusion.
+---
+
+# API Reference
+
+## `server(name, handler, options?)`
+
+Registers a new server function in the backend registry.
+
+- **`name`** (`string`): Unique identifier for the route.
+- **`handler`** (`(...args: any[]) => Promise<any>`): The async execution logic.
+- **`options`** (`object`, optional):
+  - `middleware`: Array of route-specific middleware functions.
+  - `cacheTTL`: Time to live for the cache in milliseconds.
+
+## `useServer(serverFunction, ...args)`
+
+React hook to fetch data from a server function.
+
+- **`serverFunction`**: The function reference imported from your backend.
+- **`args`**: The arguments to pass to the function.
+- **Returns**: `{ data, isLoading, error, refetch }`
+
+## `useMutation(serverFunction)`
+
+React hook to execute a state-mutating server function.
+
+- **`serverFunction`**: The function reference imported from your backend.
+- **Returns**: `{ mutate, isPending, error, data }`
+
+## `protectedRoute(roles?, handler)`
+
+Wraps a server function to ensure the user is authenticated and has the correct roles.
+
+- **`roles`** (`string[]`, optional): Array of required roles (e.g. `['admin']`).
+- **`handler`** (`(ctx, ...args) => Promise<any>`): The wrapped function logic.
+
+## `useMiddleware(handler)`
+
+Registers a global middleware that intercepts every request.
+
+- **`handler`** (`(ctx, next) => Promise<any>`): The middleware logic.
+
+## `getContext()`
+
+Returns the current request context injected by `AsyncLocalStorage`.
+
+- **Returns**: `FusionContext` (`{ req, res, cookies, user? }`)
+
+## `cacheManager`
+
+The core caching utility.
+- `cacheManager.get(key)`
+- `cacheManager.set(key, value, ttl)`
+- `cacheManager.clearByPrefix(prefix)`
+
+## `invalidate(routeOrKey)`
+
+Invalidates the cache for a specific route.
+
+- **`routeOrKey`** (`string | Function`): The route name or function reference to invalidate.

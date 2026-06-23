@@ -1,0 +1,31 @@
+---
+title: Changelog
+description: Latest updates and version history.
+---
+
+# Changelog
+
+## v3.0.0 (Latest)
+
+**Major Overhaul & Production Release**
+- Introduced the `authMiddleware` for automatic JWT management.
+- Added `protectedRoute` wrapper for granular RBAC.
+- Re-architected `executeRoute` to support deep context injection via `AsyncLocalStorage`.
+- Migrated Devtools to a standalone package (`@suamnkayal/react-fusion-devtools`).
+
+## v2.1.0
+
+- Added `useMiddleware` for global request interception.
+- Introduced the `EventBus` for server-side telemetry.
+- Fixed a bug where `useMutation` would not reset its error state upon consecutive calls.
+
+## v2.0.0
+
+- Stable release of the Vite Plugin client generator.
+- Improved TypeScript inference for complex nested object returns.
+- Added Zod integration support.
+
+## v1.0.0
+
+- Initial Proof of Concept.
+- Basic `server()` and `useServer()` implementations.

@@ -1,0 +1,59 @@
+---
+title: Authentication
+description: Built-in JWT Authentication and HTTP-only cookies.
+---
+
+# Authentication
+
+React Fusion v3.0 introduces a robust, non-intrusive Authentication system built around Node.js's `AsyncLocalStorage`. It automatically handles JWT token verification and securely stores sessions using HTTP-only cookies.
+
+## The Auth Middleware
+
+To enable authentication across your API, simply apply the `authMiddleware`. This middleware automatically intercepts requests, extracts the `accessToken` from cookies, verifies it, and attaches the parsed user payload to `ctx.user`.
+
+```ts
+import { server, useMiddleware } from "@suamnkayal/react-fusion/runtime";
+import { authMiddleware } from "@suamnkayal/react-fusion/auth";
+
+// Apply globally
+useMiddleware(authMiddleware);
+```
+
+## Context Injection
+
+React Fusion uses `AsyncLocalStorage` to securely pass context to your server functions without changing their signatures. You can retrieve the verified user at any time using `getContext()`.
+
+```ts
+import { server, getContext } from "@suamnkayal/react-fusion/runtime";
+
+export const getMyProfile = server("getMyProfile", async () => {
+  const ctx = getContext();
+  
+  if (!ctx.user) {
+    throw new Error("Unauthorized");
+  }
+  
+  return await db.users.findById(ctx.user.id);
+});
+```
+
+## JWT Utilities
+
+React Fusion provides built-in utilities for generating and managing JWTs and cookies during login, signup, and logout flows.
+
+### Login Example
+
+```ts
+import { server, getContext } from "@suamnkayal/react-fusion/runtime";
+import { signToken, setAuthCookies } from "@suamnkayal/react-fusion/auth";
+
+export const login = server("login", async ({ email, password }) => {
+  const user = await verifyCredentials(email, password);
+  const token = signToken({ id: user.id, roles: user.roles });
+  
+  const ctx = getContext();
+  setAuthCookies(ctx.res, token);
+  
+  return { success: true };
+});
+```

@@ -1,0 +1,50 @@
+---
+title: Caching
+description: TanStack-like query caching powered by an in-memory manager.
+---
+
+# Cache Manager
+
+React Fusion includes a built-in `CacheManager` to minimize redundant backend logic execution and provide a snappy, TanStack-like query experience right out of the box.
+
+## How It Works
+
+By default, the `executeRoute` engine integrates with the `CacheManager`. When you call `useServer` on the client, the backend will check its cache before executing the function logic. It utilizes deduplication to ensure concurrent identical requests only trigger the backend logic once.
+
+## Configuration
+
+You can customize caching behavior at the route level using the `options` parameter in `server()`.
+
+```ts
+import { server } from "@suamnkayal/react-fusion/runtime";
+
+export const getLeaderboard = server(
+  "getLeaderboard", 
+  async () => {
+    return await db.leaderboard.getTop(100);
+  },
+  { cacheTTL: 60000 } // Cache results for 60 seconds
+);
+```
+
+## Cache Invalidation
+
+When you mutate data, you often need to invalidate the cache for related queries. React Fusion provides `invalidate()` and `refetch()` utilities via the `EventBus`.
+
+```ts
+import { server, invalidate, refetch } from "@suamnkayal/react-fusion/runtime";
+
+export const addUserScore = server("addUserScore", async (userId: string, score: number) => {
+  await db.scores.insert({ userId, score });
+  
+  // Clears the cache for getLeaderboard
+  invalidate("getLeaderboard"); 
+  
+  // Alternatively, actively refetch the query
+  // refetch("getLeaderboard"); 
+  
+  return { success: true };
+});
+```
+
+The `EventBus` broadcasts these invalidation events, ensuring that connected Devtools panels and the `CacheManager` are instantly synced.

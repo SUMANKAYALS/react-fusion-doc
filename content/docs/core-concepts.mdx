@@ -1,0 +1,26 @@
+---
+title: Core Concepts
+description: How React Fusion bridges the gap between client and server.
+---
+
+# Core Concepts
+
+Understanding how React Fusion works under the hood is key to mastering the framework.
+
+## The Server Registry
+
+When you call `server("name", handler)`, React Fusion does not immediately start an HTTP server. Instead, it registers the handler into a global `Registry`.
+
+In development, the Vite plugin hooks into the Vite dev server and intercepts requests matching the `/__fusion_api/` prefix. It looks up the route name in the registry, executes the handler, and returns the result.
+
+In production, you initialize the runtime alongside your Node.js server (e.g., Express or Fastify) which exposes the registry over a standard REST endpoint.
+
+## The Client Generator
+
+The React Fusion Vite plugin parses your server files and automatically generates a `.fusion/client.ts` file in your root directory. This file contains strongly-typed wrapper functions for every `server()` call. 
+
+When you import `useServer` or `useMutation`, you pass the original server function reference. The plugin rewrites this import to point to the generated `.fusion/client.ts` instead, ensuring that no server code is ever bundled into your frontend.
+
+## AsyncLocalStorage
+
+React Fusion relies heavily on Node.js's `AsyncLocalStorage` to manage the request lifecycle without polluting your function arguments. This allows `getContext()` to work seamlessly, injecting things like the Express Request object, Cookies, and verified Users anywhere in your backend logic.

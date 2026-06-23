@@ -1,0 +1,53 @@
+---
+title: Server Functions
+description: Define backend logic and fetch it easily from the client.
+---
+
+# Server Functions
+
+Server Functions are the core of React Fusion. They allow you to write backend logic that is securely executed on the server, while exposing a perfectly typed interface to the client.
+
+## `server()` Wrapper
+
+To create a server function, wrap your logic with `server(name, handler)`.
+
+```ts
+import { server } from "@suamnkayal/react-fusion/runtime";
+
+export const getUser = server("getUser", async (id: string) => {
+  const db = await getDatabase();
+  const user = await db.users.findById(id);
+  
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  return user;
+});
+```
+
+### Parameters
+
+- `name` (string): A unique identifier for the route. This is used by the generated client and the Vite proxy to route HTTP requests correctly.
+- `handler` (function): The async function containing your backend logic. The arguments and return type of this function dictate the inferred TypeScript signature on the frontend.
+- `options` (optional): An object to define route-level configuration, such as specific middleware or cache duration.
+
+## Return Types
+
+React Fusion automatically infers the return type of your handler. Because the client makes an HTTP request under the hood, the return type must be serializable to JSON.
+
+```ts
+export const getStats = server("getStats", async () => {
+  // The client will infer: { users: number; active: boolean }
+  return {
+    users: 100,
+    active: true
+  };
+});
+```
+
+## Best Practices
+
+1. **Keep Names Unique**: The `name` parameter must be unique across your entire application.
+2. **Error Handling**: Throw standard JavaScript `Error` objects inside the handler. The Vite plugin will catch these and forward the error message back to the client.
+3. **Context**: Use `getContext()` to access the request context (like cookies and headers) rather than passing them manually as arguments.

@@ -1,0 +1,37 @@
+---
+title: Role Based Access Control
+description: Secure your routes with the protected() wrapper.
+---
+
+# Role Based Access Control (RBAC)
+
+While `authMiddleware` populates the user context, you often need to restrict specific server functions to certain user roles (e.g., only "admins" can delete a post). React Fusion provides the `protected()` wrapper for this exact purpose.
+
+## The `protected()` Wrapper
+
+The `protected` wrapper is an inline route interceptor that verifies `ctx.user` and their roles before executing your function. It seamlessly integrates with TypeScript, guaranteeing that inside a protected block, `ctx.user` is defined.
+
+```ts
+import { server, protectedRoute } from "@suamnkayal/react-fusion/runtime";
+
+export const deletePost = server("deletePost", protectedRoute(["admin"], async (ctx, postId: string) => {
+    // This function knows it's protected, so `ctx` and `ctx.user` are strongly typed.
+    await db.posts.delete(postId);
+    return { deleted: true, by: ctx.user.id };
+}));
+```
+
+## Usage Without Roles
+
+If you just want to ensure a user is logged in, but don't care about their specific role, you can omit the roles array.
+
+```ts
+export const getPrivateData = server("getPrivateData", protectedRoute(async (ctx) => {
+    // Only accessible if `ctx.user` exists.
+    return { secret: 42 };
+}));
+```
+
+## Behind the Scenes
+
+The `protectedRoute` wrapper grabs `ctx` using `getContext()`, verifies `ctx.user`, checks against the allowed roles, and then explicitly passes `ctx` to your wrapped function as the first argument, followed by your actual parameters. This guarantees 100% backward compatibility while delivering full-featured RBAC.

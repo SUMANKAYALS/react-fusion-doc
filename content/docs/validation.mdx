@@ -1,0 +1,53 @@
+---
+title: Validation
+description: Seamlessly validate inputs using Zod.
+---
+
+# Validation
+
+Data validation is critical for building secure server functions. React Fusion integrates natively with Zod, the industry-standard TypeScript-first schema declaration and validation library.
+
+## Basic Validation
+
+You can define a Zod schema and run `.parse()` inside your server function. If parsing fails, Zod throws an error which React Fusion gracefully catches and returns to the client.
+
+```ts
+import { server } from "@suamnkayal/react-fusion/runtime";
+import { z } from "zod";
+
+const UserSchema = z.object({
+  username: z.string().min(3),
+  age: z.number().int().positive()
+});
+
+export const createUser = server("createUser", async (input) => {
+  // Throws if validation fails
+  const data = UserSchema.parse(input);
+  
+  await db.users.insert(data);
+  return { success: true };
+});
+```
+
+## Error Handling
+
+When validation fails, `useMutation` on the frontend will receive the validation error inside its `error` object.
+
+```tsx
+import { useMutation } from "@suamnkayal/react-fusion/react";
+import { createUser } from "../server/routes";
+
+function SignupForm() {
+  const { mutate, error, isPending } = useMutation(createUser);
+
+  return (
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      mutate({ username: "jo", age: -5 });
+    }}>
+      <button disabled={isPending}>Create User</button>
+      {error && <div className="text-red-500">{error.message}</div>}
+    </form>
+  );
+}
+```

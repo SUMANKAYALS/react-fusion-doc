@@ -1,0 +1,54 @@
+---
+title: Middleware
+description: Powerful Onion-model middleware pipeline.
+---
+
+# Middleware
+
+React Fusion uses an Onion-model middleware system. Middlewares intercept the request lifecycle, allowing you to run code before and after your server functions, mutate the context, or abort the request entirely.
+
+## Flow & Architecture
+
+Middleware receives the `ctx` (context) and a `next` function. 
+
+1. Code before `await next()` runs on the way **in**.
+2. Code after `await next()` runs on the way **out**.
+
+## Global Middleware
+
+You can apply middleware to every single route in your application using `useMiddleware()`. This is perfect for logging, global error handling, or authentication.
+
+```ts
+import { useMiddleware } from "@suamnkayal/react-fusion/runtime";
+
+useMiddleware(async (ctx, next) => {
+  const start = Date.now();
+  
+  // Proceed to the next middleware or the route handler
+  const result = await next();
+  
+  const ms = Date.now() - start;
+  console.log(`[REQ] Duration: ${ms}ms`);
+  
+  return result;
+});
+```
+
+## Route-Level Middleware
+
+You can also apply middleware to specific routes via the `options` object in the `server()` definition. Route middleware runs *after* global middleware.
+
+```ts
+import { server } from "@suamnkayal/react-fusion/runtime";
+
+const myMiddleware = async (ctx, next) => {
+  console.log("Only runs for this route");
+  return await next();
+};
+
+export const specialRoute = server(
+  "specialRoute", 
+  async () => { return "Hello"; }, 
+  { middleware: [myMiddleware] }
+);
+```
